@@ -10,6 +10,26 @@ const Home = () => {
     const [error, setError] = useState(null);
     const [searched, setSearched] = useState(false);
 
+    useEffect(() => {
+        const fetchInitialBooks = async () => {
+            setLoading(true);
+            try {
+                // Fetch some default books so the page isn't empty initially
+                const data = await searchBooks('fiction');
+                const sortedBooks = (data.docs || []).sort((a, b) =>
+                    (a.title || '').localeCompare(b.title || '')
+                );
+                setBooks(sortedBooks);
+            } catch (err) {
+                console.error("Failed to fetch initial books:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchInitialBooks();
+    }, []);
+
     const handleSearch = async (e) => {
         e.preventDefault();
         if (!query.trim()) return;
@@ -77,7 +97,7 @@ const Home = () => {
                     </div>
                 )}
 
-                {!loading && !searched && (
+                {!loading && !searched && books.length === 0 && (
                     <div className="text-center py-20">
                         <p className="text-slate-400 text-sm uppercase tracking-wider font-semibold">Start searching to see results</p>
                     </div>
